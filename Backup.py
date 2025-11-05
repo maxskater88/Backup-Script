@@ -11,20 +11,10 @@ PAUSE_BETWEEN_BATCHES = 5   # seconds to wait
 COMPRESSION = zipfile.ZIP_DEFLATED
 # ==========================
 
-def get_existing_folder(DEST_DRIVE):
-    pass
-
-def compress_folder(source_folder: Path, destination_folder: Path):
-    """Compress a single folder into a zip file."""
-    zip_name = destination_folder / f"{source_folder.name}.zip"
-    print(f"Compressing {source_folder} -> {zip_name}")
-    with zipfile.ZipFile(zip_name, "w", compression=COMPRESSION, compresslevel=9) as zipf:
-        for root, _, files in os.walk(source_folder):
-            for file in files:
-                file_path = Path(root) / file
-                arcname = file_path.relative_to(source_folder.parent)
-                zipf.write(file_path, arcname)
-    print(f"✅ Completed: {zip_name}")
+def ensure_dest(dest_drive: Path):
+    """Create the destination folder if it doesn't exist."""
+    if not dest_drive.exists():
+        dest_drive.mkdir(parents=True, exist_ok=True)
 
 def get_folders(source_drive: Path):
     """Return all top-level folders from the source drive."""
@@ -46,11 +36,18 @@ def remove_zipped(DEST_DRIVE: Path, folders: list, names: list):
         if names[i] in exists:
             check.append(i)
     return [folder for index, folder in enumerate(folders) if index not in check]
-            
-def ensure_dest(dest_drive: Path):
-    """Create the destination folder if it doesn't exist."""
-    if not dest_drive.exists():
-        dest_drive.mkdir(parents=True, exist_ok=True)
+
+def compress_folder(source_folder: Path, destination_folder: Path):
+    """Compress a single folder into a zip file."""
+    zip_name = destination_folder / f"{source_folder.name}.zip"
+    print(f"Compressing {source_folder} -> {zip_name}")
+    with zipfile.ZipFile(zip_name, "w", compression=COMPRESSION, compresslevel=9) as zipf:
+        for root, _, files in os.walk(source_folder):
+            for file in files:
+                file_path = Path(root) / file
+                arcname = file_path.relative_to(source_folder.parent)
+                zipf.write(file_path, arcname)
+    print(f"✅ Completed: {zip_name}")
 
 def main():
     start_time = time.time()
@@ -81,4 +78,5 @@ def main():
     print(f"\n🎉 Finished! Completed in approx {(end_time-start_time//60)} minutes")
 
 if __name__ == "__main__":
+
     main()
